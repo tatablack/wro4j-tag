@@ -25,11 +25,15 @@ package uk.ac.ebi.gxa.web.wro4j.tag;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
+import java.util.regex.Pattern;
+
 /**
  * @author Olga Melnichuk
  */
 class ResourcePath {
     private static final String PATH_SEPARATOR = "/";
+    private static final String PROTOCOL_SEPARATOR = "//";
+    private static final Pattern PROTOCOL_SEPARATOR_PATTERN = Pattern.compile("//[^/].*");
 
     /**
      * Normalizes the path string:
@@ -55,8 +59,14 @@ class ResourcePath {
      * @return a joined path string
      */
     public static String join(String path1, String... path2) {
-        String path = normalizePath(path1 + PATH_SEPARATOR + joiner().join(path2));
-        return path1.startsWith(PATH_SEPARATOR) ? PATH_SEPARATOR + path : path;
+        StringBuilder path = new StringBuilder(normalizePath(path1 + PATH_SEPARATOR + joiner().join(path2)));
+        if (PROTOCOL_SEPARATOR_PATTERN.matcher(path1).matches()) {
+            path = path.insert(0, PROTOCOL_SEPARATOR);
+        } else if (path1.startsWith(PATH_SEPARATOR)) {
+            path = path.insert(0, PATH_SEPARATOR);
+        }
+
+        return path.toString();
     }
 
     private static Splitter splitter() {

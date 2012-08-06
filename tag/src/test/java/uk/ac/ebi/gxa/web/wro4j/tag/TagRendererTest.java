@@ -47,7 +47,7 @@ public class TagRendererTest {
 
         Wro4jTagRenderer.DirectoryLister lister = createMock(Wro4jTagRenderer.DirectoryLister.class);
 
-        final Wro4jTagProperties properties = prepareMockProperties(true);
+        final Wro4jTagProperties properties = prepareMockProperties(true, "");
 
         replay(resolver, lister, properties);
 
@@ -76,7 +76,7 @@ public class TagRendererTest {
         expect(lister.list("/bundledjs"))
                 .andReturn(asList("test2.js", "test3.css", "group-group.ext-js"));
 
-        final Wro4jTagProperties properties = prepareMockProperties(false);
+        final Wro4jTagProperties properties = prepareMockProperties(false, "");
         expect(properties.getResourcePath(ResourceType.CSS))
                 .andReturn("/bundledcss")
                 .anyTimes();
@@ -110,7 +110,7 @@ public class TagRendererTest {
         expect(lister.list("/bundledjs"))
                 .andReturn(asList("test2.js", "test3.css"));
 
-        final Wro4jTagProperties properties = prepareMockProperties(false);
+        final Wro4jTagProperties properties = prepareMockProperties(false, "");
         expect(properties.getResourcePath(ResourceType.CSS))
                 .andReturn("/bundledcss")
                 .anyTimes();
@@ -134,12 +134,42 @@ public class TagRendererTest {
         }
     }
 
-    private Wro4jTagProperties prepareMockProperties(final boolean debug) {
+    @Test
+    public void testPrefix() throws IOException, Wro4jTagException {
+        GroupResolver resolver = createMock(GroupResolver.class);
+        expect(resolver.getGroup("group"))
+                .andReturn(createGroup());
+
+        Wro4jTagRenderer.DirectoryLister lister = createMock(Wro4jTagRenderer.DirectoryLister.class);
+
+        final Wro4jTagProperties properties = prepareMockProperties(true, "//cdn.domain/");
+
+        replay(resolver, lister, properties);
+
+        final Wro4jTagRenderer renderer = new Wro4jTagRenderer(resolver,
+                properties,
+                EnumSet.allOf(ResourceHtmlTag.class),
+                lister);
+
+        final StringWriter writer = new StringWriter();
+
+        renderer.render(writer, "group", "/ebi");
+        assertEquals("<script type=\"text/javascript\" src=\"//cdn.domain/ebi/test.js\"></script>\n" +
+                "<script type=\"text/javascript\" src=\"//cdn.domain/ebi/test2.js\"></script>\n" +
+                "<link type=\"text/css\" rel=\"stylesheet\" href=\"//cdn.domain/ebi/test.css\"/>\n" +
+                "<link type=\"text/css\" rel=\"stylesheet\" href=\"//cdn.domain/ebi/test2.css\"/>\n",
+                writer.toString());
+    }
+
+    private Wro4jTagProperties prepareMockProperties(final boolean debug, String prefix) {
         Wro4jTagProperties properties = createMock(Wro4jTagProperties.class);
         expect(properties.isDebugOn())
                 .andReturn(debug);
         expect(properties.getNameTemplate())
                 .andReturn(new BundleNameTemplate("group-@groupName@.ext-@extension@"))
+                .anyTimes();
+        expect(properties.getPrefix())
+                .andReturn(prefix)
                 .anyTimes();
         return properties;
     }

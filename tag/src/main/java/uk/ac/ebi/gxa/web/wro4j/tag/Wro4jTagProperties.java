@@ -74,4 +74,8 @@ class Wro4jTagProperties {
     public boolean isDebugOn() {
         return Boolean.parseBoolean(props.getProperty("wro4j.tag.debug", "false"));
     }
+
+    public String getPrefix() {
+        return props.getProperty("wro4j.tag.aggregation.prefix", "");
+    }
 }

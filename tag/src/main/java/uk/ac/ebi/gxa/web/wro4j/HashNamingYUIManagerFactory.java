@@ -23,7 +23,7 @@
 package uk.ac.ebi.gxa.web.wro4j;
 
 import ro.isdc.wro.extensions.manager.standalone.YUIStandaloneManagerFactory;
-import ro.isdc.wro.model.resource.util.HashEncoderNamingStrategy;
+import ro.isdc.wro.model.resource.support.naming.HashEncoderNamingStrategy;
 
 /**
  * @author Olga Melnichuk

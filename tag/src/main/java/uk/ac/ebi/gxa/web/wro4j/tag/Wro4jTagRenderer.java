@@ -93,7 +93,7 @@ public class Wro4jTagRenderer {
     }
 
     private String render(String contextPath, Resource resource) {
-        final String uri = ResourcePath.join(contextPath, resource.getUri());
+        final String uri = ResourcePath.join(properties.getPrefix() + contextPath, resource.getUri());
         return ResourceHtmlTag.forType(resource.getType()).render(uri);
     }
 
